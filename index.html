@@ -356,6 +356,45 @@
         font-weight: 700;
       }
 
+      .readonly-panel {
+        margin-top: 14px;
+        min-height: 188px;
+        border: 1px solid #d7dce6;
+        border-radius: 16px;
+        padding: 16px 20px;
+        background: #fff;
+      }
+
+      .readonly-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #7d8696;
+        font-size: 13px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .readonly-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 22px;
+        padding: 0 10px;
+        border-radius: 999px;
+        background: #eef1f5;
+        color: #5b6371;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: none;
+      }
+
+      .readonly-foot {
+        margin-top: 118px;
+        color: #757d8b;
+        font-size: 14px;
+      }
+
       .recommended-row > .cell {
         background: rgba(239, 39, 39, 0.07);
       }
@@ -707,6 +746,14 @@
               <div class="cell"><div class="mini-input"></div></div>
               <div class="cell"><div class="mini-input"></div></div>
             </div>
+          </section>
+
+          <section class="readonly-panel">
+            <div class="readonly-head">
+              <span>Price Adjustment (Supplier)</span>
+              <span class="readonly-badge">Read Only</span>
+            </div>
+            <div class="readonly-foot">Submitted by Avocado Supplier 1 on Jun 24, 2025 08:14 PM</div>
           </section>
 
           <footer class="footer">
