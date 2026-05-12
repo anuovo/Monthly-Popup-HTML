@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Counter Offer Prototype</title>
+    <style>
+      :root {
+        --line: #e4e8f0;
+        --line-strong: #d7deea;
+        --text: #1f1f1f;
+        --muted: #7d8696;
+        --blue: #2347b2;
+        --blue-soft: #f5f9ff;
+        --green: #256d33;
+        --green-soft: #f4fbf4;
+        --red: #ef2a2a;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        padding: 20px;
+        background:
+          radial-gradient(circle at top, rgba(255,255,255,0.96), rgba(245,243,238,0.92)),
+          linear-gradient(135deg, #f1ebe1, #f7f8fb 42%, #eceff5);
+        color: var(--text);
+        font-family: "Open Sans", "Segoe UI", sans-serif;
+        font-size: 14px;
+      }
+
+      .layout-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 26px;
+      }
+
+      .variant-label {
+        margin: 0 0 10px;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #5f6775;
+      }
+
+      .modal {
+        max-width: 1240px;
+        margin: 0 auto;
+        background: #fff;
+        border: 1px solid #d5dbe6;
+        border-radius: 8px;
+        padding: 22px 18px 16px;
+        box-shadow: 0 18px 50px rgba(32, 44, 67, 0.12);
+      }
+
+      .details-title {
+        margin: 0 0 12px;
+        font-size: 30px;
+        font-weight: 800;
+        line-height: 1;
+      }
+
+      .summary {
+        display: grid;
+        grid-template-columns: 1.8fr 1fr 1.8fr 1fr 1.1fr 1.3fr;
+        gap: 18px;
+        padding: 14px 16px 10px;
+        border: 1px solid var(--line-strong);
+        border-radius: 4px;
+      }
+
+      .label {
+        margin-bottom: 4px;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .value {
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .value strong {
+        display: block;
+        margin-top: 4px;
+      }
+
+      .status {
+        color: #2b7a32;
+      }
+
+      .notice {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 12px;
+        padding: 10px 14px;
+        border: 1px solid #d5e1ff;
+        border-radius: 4px;
+        background: #f7faff;
+        font-size: 13px;
+        color: #31508f;
+      }
+
+      .info {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        border: 1px solid currentColor;
+        border-radius: 50%;
+        font-size: 11px;
+        font-weight: 700;
+        flex: 0 0 auto;
+      }
+
+      .section {
+        margin-top: 16px;
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        overflow: hidden;
+        background: #fff;
+      }
+
+      .section + .section {
+        margin-top: 14px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 280px 0.9fr 0.9fr 0.9fr;
+      }
+
+      .cell {
+        min-width: 0;
+        padding: 8px 12px;
+        border-right: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        font-size: 12px;
+      }
+
+      .summary-row-cell {
+        padding-top: 6px;
+        padding-bottom: 6px;
+      }
+
+      .summary-clean {
+        border-right: 0;
+        border-bottom: 0;
+      }
+
+      .grid .cell:nth-child(4n) {
+        border-right: 0;
+      }
+
+      .span-2 {
+        grid-column: span 2;
+      }
+
+      .no-right-border {
+        border-right: 0;
+      }
+
+      .section .grid > .cell:nth-last-child(-n + 4) {
+        border-bottom: 0;
+      }
+
+      .left-title {
+        font-size: 14px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .left-title.red {
+        color: var(--red);
+      }
+
+      .left-title.green-title {
+        color: var(--green);
+      }
+
+      .left-control-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+      }
+
+      .left-control-row {
+        display: grid;
+        grid-template-columns: max-content minmax(150px, 1fr);
+        align-items: center;
+        gap: 10px;
+      }
+
+      .left-control-row .input {
+        max-width: 180px;
+      }
+
+      .left-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .left-meta .kicker {
+        font-size: 11px;
+        font-weight: 700;
+        color: #5d6574;
+      }
+
+      .left-meta .name {
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .ship-header {
+        background: linear-gradient(180deg, #f7fbff, #eef4ff);
+        text-align: center;
+        color: var(--blue);
+      }
+
+      .ship-header.green {
+        background: linear-gradient(180deg, #f7fcf7, #eef8ef);
+        color: var(--green);
+      }
+
+      .ship-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .ship-title .info {
+        width: 16px;
+        height: 16px;
+        font-size: 10px;
+      }
+
+      .ship-subtitle {
+        margin-top: 3px;
+        font-size: 10px;
+        font-weight: 700;
+      }
+
+      .month-head {
+        text-align: center;
+        padding-top: 12px;
+        padding-bottom: 6px;
+      }
+
+      .month-name {
+        font-size: 16px;
+        font-weight: 800;
+      }
+
+      .month-date {
+        margin-top: 4px;
+        font-size: 10px;
+        color: #3d62c0;
+      }
+
+      .field-label {
+        font-weight: 700;
+        color: #424955;
+        white-space: nowrap;
+      }
+
+      .summary-label {
+        color: #616a78;
+        font-weight: 600;
+      }
+
+      .field-label.green { color: #424955; }
+      .field-label.red { color: var(--red); }
+
+      .inline-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .input,
+      .mini-input {
+        width: 100%;
+        border: 1px solid #cfd5df;
+        background: #fff;
+        box-shadow: inset 0 1px 2px rgba(26, 36, 56, 0.05);
+        padding: 6px 10px;
+        font: inherit;
+      }
+
+      .input { height: 30px; }
+      .mini-input {
+        max-width: 112px;
+        height: 30px;
+        padding: 6px 10px;
+      }
+
+      .select-like {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .caret {
+        color: #6d7584;
+        font-size: 14px;
+        line-height: 1;
+      }
+
+      .gray { background: #eff0f2; font-weight: 700; }
+
+      .supplier-notes {
+        color: var(--red);
+        line-height: 1.35;
+      }
+
+      .supplier-notes .prev {
+        color: #666;
+      }
+
+      .supplier-notes .strike {
+        text-decoration: line-through;
+      }
+
+      .summary-value {
+        font-weight: 700;
+        color: #353b46;
+      }
+
+      .tiny-note {
+        font-size: 10px;
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      .recommended-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 22px;
+        padding: 0 10px;
+        border-radius: 3px;
+        background: linear-gradient(180deg, #ef3d36, #de2320);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+      }
+
+      .recommended-row > .cell {
+        background: rgba(239, 39, 39, 0.07);
+      }
+
+      .recommended-row.summary-value,
+      .recommended-row .summary-value,
+      .recommended-row.summary-cell {
+        color: var(--red);
+      }
+
+      .footer {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 18px;
+        margin-top: 16px;
+      }
+
+      .footer .notice {
+        margin-top: 0;
+        width: 560px;
+      }
+
+      .actions {
+        display: flex;
+        gap: 12px;
+      }
+
+      .btn {
+        min-width: 138px;
+        height: 42px;
+        border: 1px solid #cfd5df;
+        border-radius: 4px;
+        background: #fff;
+        font: inherit;
+        font-weight: 700;
+      }
+
+      .btn.primary {
+        min-width: 190px;
+        border-color: #4c8d4f;
+        background: linear-gradient(180deg, #4f9951, #3c7f41);
+        color: #fff;
+      }
+
+      .btn.secondary {
+        min-width: 164px;
+        border-color: #3f67cc;
+        background: linear-gradient(180deg, #4e7ee6, #315fc8);
+        color: #fff;
+      }
+
+      @media (max-width: 1100px) {
+        .summary,
+        .grid,
+        .footer {
+          grid-template-columns: 1fr;
+        }
+
+        .footer .notice {
+          width: 100%;
+        }
+
+        .actions {
+          width: 100%;
+          justify-content: flex-end;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout-stack">
+      <section>
+        <p class="variant-label">Variant A: Counter Offer</p>
+        <main class="modal">
+          <h1 class="details-title">ITEM DETAILS</h1>
+
+          <section class="summary">
+            <div>
+              <div class="label">Commodity</div>
+              <div class="value">Avocado #1 New,Conv,36ct New</div>
+            </div>
+            <div>
+              <div class="label">FOB</div>
+              <div class="value">TX/MX</div>
+            </div>
+            <div>
+              <div class="label">Ship Request (Start - Stop)</div>
+              <div class="value">07/01/2024 - 09/30/2024</div>
+            </div>
+            <div>
+              <div class="label">Terms</div>
+              <div class="value">FOB</div>
+            </div>
+            <div>
+              <div class="label">Price Type</div>
+              <div class="value">Fixed monthly</div>
+            </div>
+            <div>
+              <div class="label">Off-Invoice Allowance</div>
+              <div class="value">$0.35</div>
+            </div>
+          </section>
+
+          <section class="notice">
+            <span>Monthly values are shown for visibility. Negotiation occurs at the Ship Window level.</span>
+          </section>
+
+          <section class="section">
+            <div class="grid">
+              <div class="cell"><div class="left-title">Supplier Offer</div></div>
+              <div class="cell ship-header span-2">
+                <div class="ship-title">Ship Window 1</div>
+                <div class="ship-subtitle">07/01/2024 - 08/31/2024 &nbsp; 2 months</div>
+              </div>
+              <div class="cell ship-header green">
+                <div class="ship-title">Ship Window 2</div>
+                <div class="ship-subtitle">09/01/2024 - 09/30/2024 &nbsp; 1 month</div>
+              </div>
+
+              <div class="cell left-meta">
+                <div class="kicker">Supplier</div>
+                <div class="name">AVOCADO SUPPLIER 3</div>
+              </div>
+              <div class="cell month-head">
+                <div class="month-name">07/24</div>
+                <div class="month-date">07/01/2024-07/31/2024</div>
+              </div>
+              <div class="cell month-head">
+                <div class="month-name">08/24</div>
+                <div class="month-date">08/01/2024-08/29/2024</div>
+              </div>
+              <div class="cell month-head">
+                <div class="month-name">09/24</div>
+                <div class="month-date">08/30/2024-09/30/2024</div>
+              </div>
+
+              <div class="cell field-label">Units Avail</div>
+              <div class="cell"><div class="input gray">0</div></div>
+              <div class="cell"><div class="input gray">0</div></div>
+              <div class="cell"><div class="input gray">0</div></div>
+
+              <div class="cell field-label">Gross Price (Net)</div>
+              <div class="cell">
+                <div class="input gray">$10.00 ($9.65)</div>
+                <div class="supplier-notes">
+                  <div class="prev">Previously: <span class="strike">$10.00</span></div>
+                  <div>Original Offer: $12.00</div>
+                </div>
+              </div>
+              <div class="cell">
+                <div class="input gray">$10.00 ($9.65)</div>
+                <div class="supplier-notes">
+                  <div class="prev">Previously: <span class="strike">$10.00</span></div>
+                  <div>Original Offer: $12.00</div>
+                </div>
+              </div>
+              <div class="cell">
+                <div class="input gray">$10.00 ($9.65)</div>
+                <div class="supplier-notes">
+                  <div class="prev">Previously: <span class="strike">$10.00</span></div>
+                  <div>Original Offer: $12.00</div>
+                </div>
+              </div>
+
+              <div class="cell field-label">Price Insight</div>
+              <div class="cell supplier-notes"><strong>HIGHER</strong><br />than others</div>
+              <div class="cell supplier-notes"><strong>HIGHER</strong><br />than others</div>
+              <div class="cell supplier-notes"><strong>HIGHER</strong><br />than others</div>
+            </div>
+          </section>
+
+          <section class="section">
+            <div class="grid">
+              <div class="cell"><div class="left-title red">Your Counter Offer</div></div>
+              <div class="cell ship-header span-2">
+                <div class="ship-title">Ship Window 1</div>
+                <div class="ship-subtitle">2 months</div>
+              </div>
+              <div class="cell ship-header green">
+                <div class="ship-title">Ship Window 2</div>
+                <div class="ship-subtitle">1 month</div>
+              </div>
+
+              <div class="cell field-label red">
+                <div class="inline-row">Counter Price <span class="recommended-badge">Recommended Counter</span></div>
+              </div>
+              <div class="cell span-2">
+                <div class="input">$9.50</div>
+                <div class="tiny-note">Last Counter: $10.00</div>
+              </div>
+              <div class="cell">
+                <div class="input">$9.75</div>
+                <div class="tiny-note">Last Counter: $10.00</div>
+              </div>
+
+              <div class="cell field-label summary-label summary-row-cell summary-clean">Low Net Price</div>
+              <div class="cell summary-cell summary-value summary-row-cell summary-clean">$9.15 &nbsp; (OIA $0.35)</div>
+              <div class="cell summary-cell summary-value summary-row-cell summary-clean">$9.15 &nbsp; (OIA $0.35)</div>
+              <div class="cell summary-cell summary-value summary-row-cell summary-clean">$9.40 &nbsp; (OIA $0.35)</div>
+
+              <div class="cell field-label summary-label summary-row-cell summary-clean">Low Gross Price</div>
+              <div class="cell summary-cell summary-value summary-row-cell summary-clean">$9.50</div>
+              <div class="cell summary-cell summary-value summary-row-cell summary-clean">$9.50</div>
+              <div class="cell summary-cell summary-value summary-row-cell summary-clean">$9.75</div>
+
+              <div class="cell field-label summary-label summary-row-cell summary-clean">Average Gross Price</div>
+              <div class="cell summary-cell summary-value summary-row-cell summary-clean">$9.65</div>
+              <div class="cell summary-cell summary-value summary-row-cell summary-clean">$9.65</div>
+              <div class="cell summary-cell summary-value summary-row-cell summary-clean">$9.90</div>
+
+              <div class="cell field-label summary-label summary-row-cell recommended-row summary-clean">Recommended Counter</div>
+              <div class="cell recommended-row summary-cell summary-value summary-row-cell summary-clean">$9.50</div>
+              <div class="cell recommended-row summary-cell summary-value summary-row-cell summary-clean">$9.50</div>
+              <div class="cell recommended-row summary-cell summary-value summary-row-cell summary-clean">$9.75</div>
+            </div>
+          </section>
+
+          <footer class="footer">
+            <div class="actions">
+              <button class="btn primary">Save and Select</button>
+              <button class="btn">Cancel</button>
+            </div>
+          </footer>
+        </main>
+      </section>
+
+      <section>
+        <p class="variant-label">Variant B: Award</p>
+        <main class="modal">
+          <h1 class="details-title">ITEM DETAILS</h1>
+
+          <section class="summary">
+            <div>
+              <div class="label">Commodity</div>
+              <div class="value">Avocado #1 New,Conv,36ct New</div>
+            </div>
+            <div>
+              <div class="label">FOB</div>
+              <div class="value">TX/MX</div>
+            </div>
+            <div>
+              <div class="label">Ship Request (Start - Stop)</div>
+              <div class="value">07/01/2024 - 09/30/2024</div>
+            </div>
+            <div>
+              <div class="label">Terms</div>
+              <div class="value">FOB</div>
+            </div>
+            <div>
+              <div class="label">Price Type</div>
+              <div class="value">Fixed monthly</div>
+            </div>
+            <div>
+              <div class="label">Off-Invoice Allowance</div>
+              <div class="value">$0.35</div>
+            </div>
+          </section>
+
+          <section class="notice">
+            <span>Monthly values are shown for visibility. Negotiation occurs at the Ship Window level.</span>
+          </section>
+
+          <section class="section">
+            <div class="grid">
+              <div class="cell"><div class="left-title">Supplier Offer</div></div>
+              <div class="cell ship-header span-2">
+                <div class="ship-title">Ship Window 1</div>
+                <div class="ship-subtitle">07/01/2024 - 08/31/2024 &nbsp; 2 months</div>
+              </div>
+              <div class="cell ship-header green">
+                <div class="ship-title">Ship Window 2</div>
+                <div class="ship-subtitle">09/01/2024 - 09/30/2024 &nbsp; 1 month</div>
+              </div>
+
+              <div class="cell left-meta">
+                <div class="kicker">Supplier</div>
+                <div class="name">AVOCADO SUPPLIER 3</div>
+              </div>
+              <div class="cell month-head">
+                <div class="month-name">07/24</div>
+                <div class="month-date">07/01/2024-07/31/2024</div>
+              </div>
+              <div class="cell month-head">
+                <div class="month-name">08/24</div>
+                <div class="month-date">08/01/2024-08/29/2024</div>
+              </div>
+              <div class="cell month-head">
+                <div class="month-name">09/24</div>
+                <div class="month-date">08/30/2024-09/30/2024</div>
+              </div>
+
+              <div class="cell field-label">Units Avail</div>
+              <div class="cell"><div class="input gray">0</div></div>
+              <div class="cell"><div class="input gray">0</div></div>
+              <div class="cell"><div class="input gray">0</div></div>
+
+              <div class="cell field-label">Gross Price (Net)</div>
+              <div class="cell">
+                <div class="input gray">$10.00 ($9.65)</div>
+                <div class="supplier-notes">
+                  <div class="prev">Previously: <span class="strike">$10.00</span></div>
+                  <div>Original Offer: $12.00</div>
+                </div>
+              </div>
+              <div class="cell">
+                <div class="input gray">$10.00 ($9.65)</div>
+                <div class="supplier-notes">
+                  <div class="prev">Previously: <span class="strike">$10.00</span></div>
+                  <div>Original Offer: $12.00</div>
+                </div>
+              </div>
+              <div class="cell">
+                <div class="input gray">$10.00 ($9.65)</div>
+                <div class="supplier-notes">
+                  <div class="prev">Previously: <span class="strike">$10.00</span></div>
+                  <div>Original Offer: $12.00</div>
+                </div>
+              </div>
+
+              <div class="cell field-label">Price Insight</div>
+              <div class="cell supplier-notes"><strong>HIGHER</strong><br />than others</div>
+              <div class="cell supplier-notes"><strong>HIGHER</strong><br />than others</div>
+              <div class="cell supplier-notes"><strong>HIGHER</strong><br />than others</div>
+            </div>
+          </section>
+
+          <section class="section">
+            <div class="grid">
+              <div class="cell"><div class="left-title green-title">Your Award</div></div>
+              <div class="cell ship-header span-2">
+                <div class="ship-title">Ship Window 1</div>
+                <div class="ship-subtitle">2 months</div>
+              </div>
+              <div class="cell ship-header green">
+                <div class="ship-title">Ship Window 2</div>
+                <div class="ship-subtitle">1 month</div>
+              </div>
+
+              <div class="cell field-label green">
+                <div class="left-control-stack">
+                  <div class="left-control-row">
+                    <div>Confirm Units</div>
+                    <div class="input select-like">Weekly <span class="caret">▾</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="cell"><div class="mini-input"></div></div>
+              <div class="cell"><div class="mini-input"></div></div>
+              <div class="cell"><div class="mini-input"></div></div>
+            </div>
+          </section>
+
+          <footer class="footer">
+            <div class="actions">
+              <button class="btn primary">Save and Select</button>
+              <button class="btn secondary">Counter Offer</button>
+              <button class="btn">Cancel</button>
+            </div>
+          </footer>
+        </main>
+      </section>
+    </div>
+  </body>
+</html>
